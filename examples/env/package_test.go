@@ -12,6 +12,9 @@ var tests = []TestTable{
 	{Arg: `file_custom`, Out: `envvar from test.env is value_from_test.env`},
 	{Arg: `file_custom_local`, Out: `envvar from test.env.local is value_from_test.env.local`},
 	{Arg: `path`, Out: `PATH is [^$PLS$]+env$PS$path_from_myke.env.local$PLS$[^$PLS$]+env$PS$path_from_myke.env$PLS$[^$PLS$]+env$PS$path_from_test.env.local$PLS$[^$PLS$]+env$PS$path_from_test.env$PLS$[^$PLS$]+env$PS$path_from_yml$PLS$[^$PLS$]+env$PS$bin`},
+	{Arg: `key_template`, Out: `Templated key is template value_from_yml`},
+	{Arg: `pass_args_as_env_variable --CLI_ARGS=Test`, Out: "Args Test"},
+	{Arg: `key_template_recursive`, Out: `Templated key is recursive template value_from_yml`},
 }
 
 func Test(t *testing.T) {

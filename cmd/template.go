@@ -14,7 +14,7 @@ func Template(opts *mykeOpts) error {
 		return errors.Wrap(err, "error rendering template")
 	}
 
-	rendered, err := core.RenderTemplate(string(bytes), core.OsEnv(), map[string]string{})
+	rendered, err := core.RenderTemplate(string(bytes), core.OsEnv())
 	if err != nil {
 		return errors.Wrap(err, "error rendering template")
 	}

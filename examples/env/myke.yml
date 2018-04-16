@@ -18,6 +18,8 @@ env:
 
   # PATH is always prepended, not overwritten
   PATH: path_from_yml
+  KEY_TEMPLATE: template {{ .KEY_YML }}
+  KEY_TEMPLATE_RECURSIVE: recursive {{ .KEY_TEMPLATE }}
 tasks:
   yml:
     cmd: echo envvar from yml is $KEY_YML
@@ -31,3 +33,9 @@ tasks:
     cmd: echo envvar from test.env.local is $KEY_ENVFILE_LOCAL
   path:
     cmd: echo PATH is $PATH
+  key_template:
+    cmd: echo Templated key is $KEY_TEMPLATE
+  key_template_recursive:
+    cmd: echo Templated key is $KEY_TEMPLATE_RECURSIVE
+  pass_args_as_env_variable:
+    cmd: echo "Args $CLI_ARGS"

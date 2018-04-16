@@ -91,8 +91,12 @@ func (e *Execution) executeCmd(cmd string) error {
 		return nil
 	}
 
-	env := e.env()
-	cmd, err := RenderTemplate(cmd, e.Project.Env, e.Query.Params)
+	env, err := e.env()
+	if err != nil {
+		return err
+	}
+
+	cmd, err = RenderTemplate(cmd, env)
 	if err != nil {
 		return err
 	}
@@ -115,7 +119,7 @@ func (e *Execution) executeCmd(cmd string) error {
 	return proc.Run()
 }
 
-func (e *Execution) env() map[string]string {
+func (e *Execution) env() (map[string]string, error) {
 	myke, _ := osext.Executable()
 	extraEnv := map[string]string{
 		"myke":         myke,
@@ -125,5 +129,12 @@ func (e *Execution) env() map[string]string {
 	}
 	env := mergeEnv(mergeEnv(e.Project.Env, extraEnv), OsEnv())
 	env["PATH"] = strings.Join([]string{env["PATH"], os.Getenv("PATH")}, pathSep)
-	return env
+	env = union(env, e.Query.Params)
+
+	env, err := RenderParams(env)
+	if err != nil {
+		return nil, err
+	}
+
+	return env, nil
 }
