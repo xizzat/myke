@@ -5,9 +5,14 @@ import (
 	"github.com/kardianos/osext"
 	"github.com/pkg/errors"
 	"os"
-	"os/exec"
 	"strings"
 	"time"
+
+	"mvdan.cc/sh/interp"
+	"mvdan.cc/sh/syntax"
+	"context"
+	"os/signal"
+	"syscall"
 )
 
 // Execution represents a task and context being invoked
@@ -101,22 +106,38 @@ func (e *Execution) executeCmd(cmd string) error {
 		return err
 	}
 
-	shell := []string{"sh", "-ec"}
 	if e.Verbose > 0 {
-		shell = []string{"sh", "-exc"}
+		log.Infof("Executing cmd: \n```\n%v\n```", cmd)
 	}
-	if len(e.Task.Shell) > 0 {
-		shell = strings.Split(strings.TrimSpace(e.Task.Shell), " ")
-	}
-	shell = append(shell, cmd)
 
-	proc := exec.Command(shell[0], shell[1:]...)
-	proc.Dir = e.Project.Cwd
-	proc.Env = mapToSlice(env)
-	proc.Stdin = os.Stdin
-	proc.Stdout = os.Stdout
-	proc.Stderr = os.Stderr
-	return proc.Run()
+	p, err := syntax.NewParser().Parse(strings.NewReader(cmd), "")
+	if err != nil {
+		return err
+	}
+
+	runnerEnv, err := interp.EnvFromList(mapToSlice(env))
+	if err != nil {
+		return err
+	}
+
+	r := interp.Runner{
+		Context: getSignalContext(),
+		Dir:     e.Project.Cwd,
+		Env:     runnerEnv,
+
+		Exec: interp.DefaultExec,
+		Open: interp.OpenDevImpls(interp.DefaultOpen),
+
+		Stdin:  os.Stdin,
+		Stdout: os.Stdout,
+		Stderr: os.Stderr,
+	}
+
+	if err = r.Reset(); err != nil {
+		return err
+	}
+
+	return r.Run(p)
 }
 
 func (e *Execution) env() (map[string]string, error) {
@@ -137,4 +158,15 @@ func (e *Execution) env() (map[string]string, error) {
 	}
 
 	return env, nil
+}
+
+func getSignalContext() context.Context {
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, os.Interrupt, os.Kill, syscall.SIGTERM)
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		<-ch
+		cancel()
+	}()
+	return ctx
 }

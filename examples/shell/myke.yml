@@ -9,4 +9,4 @@ tasks:
   error:
     cmd: foobar
   echo:
-    cmd: echo
+    cmd: echo "Hello"

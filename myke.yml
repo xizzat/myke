@@ -3,3 +3,47 @@ project: myke
 desc: make with yml
 discover:
   - examples
+tasks:
+  cross-compile:
+    cmd: |
+      mkdir -p build/
+
+      echo "Building myke for Linux ..."
+      GOOS=linux GOARCH=amd64 go build -o ./build/myke ./
+      chmod +x ./build/myke
+
+      echo "Building myke for Windows ..."
+      GOOS=windows GOARCH=amd64 go build -o ./build/myke.exe ./
+  
+  publish-release:
+    cmd: |
+      RESPONSE=$(curl -s -u {{ required .GITHUB_USER }}:{{ required .GITHUB_API_TOKEN }} \
+          -XPOST \
+          https://api.github.com/repos/srettenmeier/myke/releases \
+          -d '
+            {
+              "tag_name": "v{{ required .VERSION }}", 
+              "target_commitish": "master", 
+              "name": "v{{ required .VERSION }}", 
+              "draft": false, 
+              "prerelease": false 
+            }' \
+          )
+      echo $RESPONSE
+
+      RELEASE_ID=$(echo $RESPONSE | jq ".id")
+      myke publish-assets --RELEASE_ID=$RELEASE_ID
+  
+  publish-assets:
+    cmd: |
+      curl -u {{ required .GITHUB_USER }}:{{ required .GITHUB_API_TOKEN }} \
+        -XPOST \
+        --header "Content-Type: application/octet-stream" \
+        https://uploads.github.com/repos/srettenmeier/myke/releases/{{ required .RELEASE_ID }}/assets?name=myke_linux_amd64 \
+        --data-binary @build/myke
+
+      curl -u {{ required .GITHUB_USER }}:{{ required .GITHUB_API_TOKEN }} \
+        -XPOST \
+        --header "Content-Type: application/octet-stream" \
+        https://uploads.github.com/repos/srettenmeier/myke/releases/{{ required .RELEASE_ID }}/assets?name=myke_windows_amd64 \
+        --data-binary @build/myke.exe
