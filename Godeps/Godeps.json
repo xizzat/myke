@@ -77,10 +77,6 @@
 			"Rev": "2402e8e7a02fc811447d11f881aa9746cdc57983"
 		},
 		{
-			"ImportPath": "github.com/tgulacsi/wrap",
-			"Rev": "972bd931cfd19b139c8c034927b3ccb7fae8fa0b"
-		},
-		{
 			"ImportPath": "github.com/tidwall/gjson",
 			"Rev": "e30a9c1037e0f9fbde93a6a9848a2dd5c59d3b91"
 		},
