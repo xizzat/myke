@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/rdsubhas/go-elastictable"
+	"github.com/xizzat/go-elastictable"
 	"sort"
 	"strings"
 )

@@ -63,10 +63,6 @@
 			"Rev": "792786c7400a136282c1664665ae0a8db921c6c2"
 		},
 		{
-			"ImportPath": "github.com/rdsubhas/go-elastictable",
-			"Rev": "6f173a85235b3139683de6e37892a576a9fdca08"
-		},
-		{
 			"ImportPath": "github.com/satori/go.uuid",
 			"Comment": "v1.1.0-6-gb061729",
 			"Rev": "b061729afc07e77a8aa4fad0a2fd840958f1942a"
